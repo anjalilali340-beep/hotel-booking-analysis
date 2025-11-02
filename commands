@@ -1,0 +1,52 @@
+
+import pandas as pd
+
+
+
+#  for Excel
+df = pd.read_excel(r'C:\Users\Anjali\OneDrive\Desktop\booking.xlsx')       
+
+# Check total missing values in each column
+print(df.isnull().sum())
+
+# OR to see only columns having missing values
+missing = df.isnull().sum()
+missing = missing[missing > 0]
+print("Columns with missing values:\n", missing)
+
+df.info()
+df.describe()
+df.nunique()
+
+df.isna().sum().sort_values(ascending=False)
+df['reservation_status_date'] = pd.to_datetime(df['reservation_status_date'])
+
+
+status = df.groupby(['hotel','is_canceled']).count().unstack(fill_value=0)
+status.plot(kind='bar', stacked=True)
+
+top_countries = df['country'].value_counts().head(10)
+top_countries.plot(kind='barh')
+
+
+monthly = df.groupby(['arrival_date_year','arrival_date_month','hotel']).size().reset_index(name='bookings')
+# pivot and plot
+
+channel = df['distribution_channel'].value_counts()
+channel.plot(kind='bar')
+
+monthly_cancel = df[df['is_canceled']==1].groupby(['arrival_date_year','arrival_date_month']).size()
+
+df['stay_nights'] = df['stays_in_weekend_nights'] + df['stays_in_week_nights']
+df['stay_nights'].hist(bins=20)
+
+import scipy.stats as stats
+city = df[df['hotel']=='City Hotel']['stays_in_weekend_nights']
+resort = df[df['hotel']=='Resort Hotel']['stays_in_weekend_nights']
+stats.ttest_ind(city, resort, equal_var=False)
+room_counts = df['assigned_room_type'].value_counts()
+room_counts.plot(kind='bar')
+
+df['hotel'].value_counts(normalize=True).plot(kind='pie', autopct='%1.1f%%')
+
+
